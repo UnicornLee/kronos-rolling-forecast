@@ -1,5 +1,5 @@
 #!/bin/bash
-# 每天跑一次 Kronos 3 天预测 → 归档 → 重建 series.json → 推送 GitHub
+# 每天跑一次 Kronos 3 天预测 → 归档 → 重建 series.json / proxy.json → 推送 GitHub
 # 由 launchd 每天北京时间 01:20 调用（日线 00:00 收盘后）
 set -uo pipefail
 
@@ -8,6 +8,8 @@ FC="$BASE/forecast"
 SITE="$BASE/rolling-forecast-site"
 PY="$BASE/native-venv/bin/python"
 SHIM_PY="$BASE/rolling-forecast-site/scripts/build_data.py"
+PROXY_PY="$BASE/rolling-forecast-site/scripts/build_proxy_data.py"
+FETCH_PROXY_PY="$BASE/rolling-forecast-site/scripts/fetch_proxy.py"
 LOG="$BASE/rolling-forecast-site/scripts/daily.log"
 
 mkdir -p "$(dirname "$LOG")"
@@ -105,6 +107,23 @@ for s in BTC ETH XAUT; do
 done
 cd "$SITE" || exit 1
 "$PY" "$SHIM_PY" >> "$LOG" 2>&1 || { say "✗ build_data.py 失败"; exit 1; }
+
+# 4b) 刷新代理变量 → 重建 proxy.json
+#     抓取失败不中断流程（旧文件会被沿用），只是当天的数据旧一天
+say "4b) 刷新代理变量 + 重建 proxy.json"
+if [ -f "$FETCH_PROXY_PY" ]; then
+  "$PY" "$FETCH_PROXY_PY" 2>&1 | tee -a "$LOG"
+  if [ "${PIPESTATUS[0]}" != "0" ]; then
+    say "  ! 代理变量有源失败（多半是 Yahoo 限流或代理没开），沿用已有文件"
+  fi
+else
+  say "  ! 找不到 $FETCH_PROXY_PY，跳过"
+fi
+if [ -f "$PROXY_PY" ]; then
+  "$PY" "$PROXY_PY" >> "$LOG" 2>&1 || say "  ! build_proxy_data.py 失败，research 页保持旧数据"
+else
+  say "  ! 找不到 $PROXY_PY，跳过"
+fi
 
 # 5) 提交推送
 say "5) 推送"
