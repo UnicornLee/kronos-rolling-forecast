@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.unicornlee.kronos-rolling-forecast</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Volumes/ssd990pro1t/kronos/rolling-forecast-site/scripts/daily.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Volumes/ssd990pro1t/kronos/rolling-forecast-site</string>
+
+    <!-- 每天北京时间 01:20（日线 00:00 收盘后 80 分钟，留出数据同步余量） -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>1</integer>
+        <key>Minute</key>
+        <integer>20</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Volumes/ssd990pro1t/kronos/rolling-forecast-site/scripts/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Volumes/ssd990pro1t/kronos/rolling-forecast-site/scripts/launchd.err.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>
