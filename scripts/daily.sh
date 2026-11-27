@@ -26,22 +26,22 @@ cd "$BASE/Kronos/contrib/forecast" || { say "✗ 找不到 fetch_more"; exit 1; 
 import sys, os
 sys.path.insert(0, os.getcwd())
 import fetch_more as fm
-for inst in ("BTC-USDT", "ETH-USDT", "XAUT-USDT"):
+
+OUTDIR = "/Volumes/ssd990pro1t/kronos/forecast/data"
+os.makedirs(OUTDIR, exist_ok=True)
+
+for sym, inst in fm.SYMS.items():
     try:
-        rows = fm.collect(inst, "1D", 3000)
-        closed = [r for r in rows if len(r) > 8 and r[8] == "1"]
-        out = os.path.join("/Volumes/ssd990pro1t/kronos/forecast/data",
-                           inst.split("-")[0] + "_1D.csv")
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        import csv
-        with open(out, "w", newline="") as fh:
-            w = csv.writer(fh)
-            w.writerow(["ts", "open", "high", "low", "close", "volume", "volCcy", "volCcyQuote", "confirm"])
+        rows = fm.collect(inst, "1D", 3000)          # 返回 dict{ts: row}
+        closed = [rows[t] for t in sorted(rows) if len(rows[t]) > 8 and rows[t][8] == "1"]
+        path = os.path.join(OUTDIR, f"{sym}_1D.csv")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("timestamps,open,high,low,close,volume,amount\n")
             for r in closed:
-                w.writerow(r)
-        print(f"  {inst}: {len(closed)} 行 -> {out}")
+                fh.write(",".join([fm.fmt(int(r[0])), r[1], r[2], r[3], r[4], r[5], r[7]]) + "\n")
+        print(f"  {sym}: {len(closed)} 行  {fm.fmt(int(closed[-1][0]))} close={closed[-1][4]}")
     except Exception as e:
-        print(f"  {inst} 失败: {e}")
+        print(f"  {sym} 失败: {e}")
 PYEOF
 
 # 2) 跑预测
