@@ -63,6 +63,17 @@ if [ -n "$LAST_CSV_TS" ] && [ "$LAST_CSV_TS" = "$LAST_RUN_TS" ]; then
   STAMP=""
 else
   KRONOS_H=3 "$PY" forecast_compare.py >> "$LOG" 2>&1
+  # 校验：预测真的跑在新数据上，而不是上一轮的旧 all.json 被当成本轮结果归档
+  NEW_TS=$("$PY" - << PYEOF2 2>/dev/null
+import json
+d = json.load(open("/Volumes/ssd990pro1t/kronos/forecast/out_compare/all.json", encoding="utf-8"))
+print(next(iter(d.values())).get("history_to", ""))
+PYEOF2
+)
+  if [ "$NEW_TS" != "$LAST_CSV_TS" ]; then
+    say "  ✗ 预测失败或未刷新（all.json history_to=$NEW_TS，期望 $LAST_CSV_TS），本轮不归档"
+    exit 1
+  fi
   STAMP=$(date +%Y%m%d_%H%M)
 fi
 
