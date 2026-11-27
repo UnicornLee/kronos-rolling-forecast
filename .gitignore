@@ -1,19 +1,14 @@
+# 本仓只放 GitHub Pages 产物（index.html / research.html / assets/ / data/）
+# 源码、原始数据源、构建脚本在私有仓：UnicornLee/kronos-rolling-forecast-src
+
 # 本地临时
 *.log
 .DS_Store
 Thumbs.db
 
-# Python
-__pycache__/
-*.pyc
-.venv/
-
 # 编辑器
 .vscode/
 .idea/
-
-# 不要把 Mac 上的原始全量历史也塞进来
-sources/raw/
 
 # 本地调试截图
 /shots/
