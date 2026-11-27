@@ -1,0 +1,16 @@
+# 本地临时
+*.log
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 编辑器
+.vscode/
+.idea/
+
+# 不要把 Mac 上的原始全量历史也塞进来
+sources/raw/
