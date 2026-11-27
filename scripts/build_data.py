@@ -208,6 +208,19 @@ def main():
         }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
+
+    # 内容没变就沿用旧的 generated_at，避免每天只因为时间戳而多一个提交
+    if os.path.exists(OUT):
+        try:
+            old = json.load(open(OUT, encoding="utf-8"))
+            a = {k: v for k, v in old.items() if k != "generated_at"}
+            b = {k: v for k, v in payload.items() if k != "generated_at"}
+            if a == b:
+                payload["generated_at"] = old.get("generated_at", payload["generated_at"])
+                print("  [nochange] 数据没有变化，保留原 generated_at")
+        except Exception:
+            pass
+
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=1)
 
