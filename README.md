@@ -1,5 +1,7 @@
 # Kronos 滚动预测 · 三天视野叠加对比
 
+**线上：<https://unicornlee.github.io/kronos-rolling-forecast/>**
+
 把 **每天预测的未来 3 天** 画在同一张图上，连续 3 次预测各用一种颜色区分，**第 4 次预测自动回到第 1 次的颜色**。
 每条折线的点、虚线端点、概率区间上下沿都直接标注价格，颜色与该次预测一致；X 轴刻度颜色也跟随覆盖该日期的那次预测。
 
@@ -50,32 +52,45 @@ datetime.strptime(s, "%Y-%m-%d %H:%M:%S") + timedelta(hours=8, days=1)
 
 ---
 
-## 更新数据
+## 每日自动更新
 
-### 1. 在 Mac 上跑一次预测
+已配置在 Mac 上用 **launchd** 每天 **北京时间 01:20** 跑（日线 00:00 收盘后留 80 分钟余量）：
+
+```
+~/Library/LaunchAgents/com.unicornlee.kronos-rolling-forecast.plist
+  → /bin/bash /Volumes/ssd990pro1t/kronos/rolling-forecast-site/scripts/daily.sh
+```
+
+`daily.sh` 六步：
+
+1. 用 `fetch_more.collect()` 刷新三标的已收盘日 K（`confirm == "1"`）；
+2. **数据没推进就跳过重跑**（同一天手动触发多次不会白烧 2 分钟 GPU）；
+3. 跑 `KRONOS_H=3 forecast_compare.py`，把 `out_compare/*.json` 归档到 `history/run_YYYYMMDD_HHMM/`；
+4. 复制进站点的 `sources/runs/` 与 `sources/actual/`，重建 `series.json`；
+5. `git pull --rebase` → `commit` → `push`，Pages 自动发布；
+6. 只保留最近 40 次归档，更早的从本地和仓库一起清掉。
+
+日志：`rolling-forecast-site/scripts/daily.log`。
+
+### 手动触发
 
 ```bash
-cd /Volumes/ssd990pro1t/kronos/forecast/scripts
-KRONOS_H=3 /Volumes/ssd990pro1t/kronos/native-venv/bin/python forecast_compare.py
+ssh mac 'bash /Volumes/ssd990pro1t/kronos/rolling-forecast-site/scripts/daily.sh'
 ```
 
-输出到 `/Volumes/ssd990pro1t/kronos/forecast/out_compare/all.json`。
-
-### 2. 归档到 history
+### 卸载定时任务
 
 ```bash
-D=/Volumes/ssd990pro1t/kronos/forecast/history/run_$(date +%Y%m%d_%H%M)
-mkdir -p "$D" && cp /Volumes/ssd990pro1t/kronos/forecast/out_compare/*.json "$D"/
+launchctl unload ~/Library/LaunchAgents/com.unicornlee.kronos-rolling-forecast.plist
+rm ~/Library/LaunchAgents/com.unicornlee.kronos-rolling-forecast.plist
 ```
 
-### 3. 同步到本仓库并重建
+### 为什么不用 GitHub Actions 定时（`.github/workflows/update.yml` 保留了但未启用）
 
-```powershell
-# Windows 侧
-.\scripts\sync.ps1
-```
+GitHub 的 `cron` 跑在 GitHub 的机器上，那台机器连不到你家里 Mac 上的 `/Volumes/ssd990pro1t`。
+要让它工作必须让 GitHub 反向 SSH 进你的 Mac，等于在公网开一个入口，还要把私钥放进仓库 Secrets。
+launchd 在 Mac 本地跑，只往外推，简单且没有暴露面。workflow 文件留着当备用方案（需要 self-hosted runner 时可用）。
 
-`sync.ps1` 做的事：从 Mac 拉 `history/` 全部归档与最新日线 CSV → 放进 `sources/` → 跑 `build_data.py` → 提示 git 提交。
 
 ---
 
