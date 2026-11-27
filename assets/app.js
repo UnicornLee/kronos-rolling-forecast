@@ -315,6 +315,20 @@
   var lastGeom = null;
   var lastShown = [];
 
+  // 带顶点热区：命中时放大圆点 + 显示数值
+  function highlight(node, show) {
+    var ring = el.svg.querySelector('#hoverRing');
+    if (!ring) return;
+    if (!show || !node) {
+      ring.setAttribute('r', '0');
+      return;
+    }
+    ring.setAttribute('cx', node.getAttribute('cx'));
+    ring.setAttribute('cy', node.getAttribute('cy'));
+    ring.setAttribute('stroke', node.getAttribute('data-color') || 'currentColor');
+    ring.setAttribute('r', '6.5');
+  }
+
   function bindTip() {
     el.svg.addEventListener('mousemove', function (ev) {
       if (!lastGeom) { el.tip.hidden = true; return; }
@@ -323,46 +337,65 @@
       var svgX = (ev.clientX - rect.left) / rect.width * lastGeom.W;
       var svgY = (ev.clientY - rect.top) / rect.height * lastGeom.H;
 
-      var fx = (svgX - lastGeom.PAD_L) / (lastGeom.W - lastGeom.PAD_L - lastGeom.PAD_R);
-      var fy = (svgY - lastGeom.PAD_T) / (lastGeom.H - lastGeom.PAD_T - lastGeom.PAD_B);
-      if (fx < -0.02 || fx > 1.02 || fy < -0.02 || fy > 1.02) { el.tip.hidden = true; return; }
+      var lines = null;
 
-      var t = lastGeom.xmin.getTime() + fx * (lastGeom.xmax.getTime() - lastGeom.xmin.getTime());
-      var v = lastGeom.ymax - fy * (lastGeom.ymax - lastGeom.ymin);
-
-      // 找最近的一次预测点（同一时间轴）
-      var best = null, bestD = 1e18;
-      (lastShown || []).forEach(function (r) {
-        r.dates.forEach(function (s, k) {
-          var pt = K.parseDate(s).getTime();
-          var dx = lastGeom.X(pt) - svgX;
-          var dy = lastGeom.Y(r.pretrained.p50[k]) - svgY;
-          var d = dx * dx + dy * dy;
-          if (d < bestD) {
-            bestD = d;
-            best = { run: r, k: k, date: s, p50: r.pretrained.p50[k] };
-          }
-        });
-      });
-
-      var actMap = {};
-      symData.actual.forEach(function (p) { actMap[p[0]] = p[1]; });
-
-      var lines = [
-        '<b>' + K.fmtMDHM(new Date(t)) + '</b>',
-        '坐标 ≈ ' + K.fmtPrice(v)
-      ];
-      if (best && bestD < 26 * 26) {
-        lines.push('run' + best.run.index + ' P50 = ' + K.fmtPrice(best.p50));
+      // 1) 优先命中带顶点热区（P10 / P90）
+      var target = ev.target;
+      if (target && target.classList && target.classList.contains('bandpt')) {
+        highlight(target, true);
+        var edge = target.getAttribute('data-edge') === 'p90' ? 'P90（乐观上沿）' : 'P10（悲观下沿）';
+        lines = [
+          '<b>' + target.getAttribute('data-date').slice(0, 16) + '</b>',
+          edge + ' = <b style="color:' + target.getAttribute('data-color') + '">' +
+            K.fmtPrice(parseFloat(target.getAttribute('data-v'))) + '</b>',
+          '（' + target.getAttribute('data-run') + '）'
+        ];
+      } else {
+        highlight(null, false);
       }
-      // 当天真实收盘
-      var keys = Object.keys(actMap);
-      var near = keys.reduce(function (a, k2) {
-        var d2 = Math.abs(K.parseDate(k2).getTime() - t);
-        return d2 < a.d ? { d: d2, k: k2 } : a;
-      }, { d: Infinity, k: null });
-      if (near.k && near.d < 6 * 3600 * 1000) {
-        lines.push('真实收盘 = <b>' + K.fmtPrice(actMap[near.k]) + '</b>');
+
+      // 2) 没命中顶点就按坐标找最近的 P50 点
+      if (!lines) {
+        var fx = (svgX - lastGeom.PAD_L) / (lastGeom.W - lastGeom.PAD_L - lastGeom.PAD_R);
+        var fy = (svgY - lastGeom.PAD_T) / (lastGeom.H - lastGeom.PAD_T - lastGeom.PAD_B);
+        if (fx < -0.02 || fx > 1.02 || fy < -0.02 || fy > 1.02) { el.tip.hidden = true; return; }
+
+        var t = lastGeom.xmin.getTime() + fx * (lastGeom.xmax.getTime() - lastGeom.xmin.getTime());
+        var v = lastGeom.ymax - fy * (lastGeom.ymax - lastGeom.ymin);
+
+        var best = null, bestD = 1e18;
+        (lastShown || []).forEach(function (r) {
+          r.dates.forEach(function (s, k) {
+            var pt = K.parseDate(s).getTime();
+            var dx = lastGeom.X(pt) - svgX;
+            var dy = lastGeom.Y(r.pretrained.p50[k]) - svgY;
+            var d = dx * dx + dy * dy;
+            if (d < bestD) {
+              bestD = d;
+              best = { run: r, k: k, date: s, p50: r.pretrained.p50[k] };
+            }
+          });
+        });
+
+        var actMap = {};
+        symData.actual.forEach(function (p) { actMap[p[0]] = p[1]; });
+
+        lines = [
+          '<b>' + K.fmtMDHM(new Date(t)) + '</b>',
+          '坐标 ≈ ' + K.fmtPrice(v)
+        ];
+        if (best && bestD < 26 * 26) {
+          lines.push(best.run.id + ' P50 = ' + K.fmtPrice(best.p50));
+        }
+        var keys = Object.keys(actMap);
+        var near = keys.reduce(function (a, k2) {
+          var d2 = Math.abs(K.parseDate(k2).getTime() - t);
+          return d2 < a.d ? { d: d2, k: k2 } : a;
+        }, { d: Infinity, k: null });
+        if (near.k && near.d < 6 * 3600 * 1000) {
+          lines.push('真实收盘 = <b>' + K.fmtPrice(actMap[near.k]) + '</b>');
+        }
+        lines.push('<span style="opacity:.66">把鼠标放到阴影上沿/下沿可看区间边界值</span>');
       }
 
       el.tip.innerHTML = lines.join('<br>');
@@ -370,20 +403,33 @@
       el.tip.style.top = (ev.clientY - rect.top) + 'px';
       el.tip.hidden = false;
     });
-    el.svg.addEventListener('mouseleave', function () { el.tip.hidden = true; });
+
+    el.svg.addEventListener('mouseleave', function () {
+      el.tip.hidden = true;
+      highlight(null, false);
+    });
+  }
+
+  /* ---------- 跟随系统深浅色重绘 ---------- */
+  function watchTheme() {
+    if (!window.matchMedia) return;
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function () { if (state.data) draw(); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
   }
 
   /* ---------- PNG 导出 ---------- */
   function exportPng() {
+    var T = (K.theme && K.theme()) || { bg: '#ffffff' };
     var clone = el.svg.cloneNode(true);
-    // 画布需要显式底色
+    // 画布需要显式底色（跟随当前主题，避免深色下导出成黑底黑字）
     var bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     bg.setAttribute('x', 0); bg.setAttribute('y', 0);
     bg.setAttribute('width', 1180); bg.setAttribute('height', 620);
-    bg.setAttribute('fill', '#ffffff');
+    bg.setAttribute('fill', T.bg);
     clone.insertBefore(bg, clone.firstChild);
 
-    // 描边色用了 #fff，深色模式下导出的白描边正好
     var xml = new XMLSerializer().serializeToString(clone);
     var svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
 
@@ -394,7 +440,7 @@
       cv.width = 1180 * scale;
       cv.height = 620 * scale;
       var ctx = cv.getContext('2d');
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = T.bg;
       ctx.fillRect(0, 0, cv.width, cv.height);
       ctx.drawImage(img, 0, 0, cv.width, cv.height);
 
@@ -437,6 +483,7 @@
         document.getElementById('showCal').checked = state.showCal;
         draw();
         bindTip();
+        watchTheme();
       })
       .catch(function (e) {
         el.meta.textContent = '加载数据失败：' + e.message;
