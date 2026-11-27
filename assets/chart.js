@@ -264,6 +264,12 @@
     var labels = [];   // {pri, x, y, text, color}
     var hits = [];     // 带顶点的悬停热区
 
+    // 已兑现的日期集合：这些日期的价格由红点负责标，锚点不重复标
+    var realizedTimes = {};
+    visible.forEach(function (r) {
+      (r.realized || []).forEach(function (z) { realizedTimes[parseDate(z.date).getTime()] = 1; });
+    });
+
     visible.forEach(function (r) {
       var c = r.color, ds = r.dates, p50 = r.pretrained.p50;
       var pts = ds.map(function (s, k) { return [X(parseDate(s).getTime()), Y(p50[k])]; });
@@ -301,6 +307,13 @@
       // ---- 收集标签 ----
       if (opts.showLabels) {
         var pri = r.isLatest ? 1 : 3;
+
+        // 起点（锚点）在折线上，同时和阴影带的首个顶点重合 —— 在线上就标价
+        // 若该日期已有真实收盘红点标过价，则不重复标
+        if (!realizedTimes[parseDate(ds[0]).getTime()]) {
+          labels.push({ pri: 0.5, x: pts[0][0], y: pts[0][1], text: fmtPrice(p50[0]), color: c.text });
+        }
+
         var fut = pts.slice(1).map(function (p, k) { return { p: p, v: p50[k + 1] }; });
         var vs = fut.map(function (o) { return o.v; });
         var flat = vs.length > 1 && (Math.max.apply(null, vs) - Math.min.apply(null, vs)) /
