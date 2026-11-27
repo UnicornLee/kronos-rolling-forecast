@@ -1,0 +1,2 @@
+[25544:14244:1127/165545.346:ERROR:chrome\browser\extensions\external_registry_loader_win.cc:161] File D:\Applications\InternetDownloadManager\IDMGCExt.crx for key Software\Google\Chrome\Extensions\ngpampappnmepgilojfohadhhmbhlaek does not exist or is not readable.
+125703 bytes written to file D:\Code\DocumentCode\kronos-rolling-forecast\shots\XAUT.png

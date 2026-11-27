@@ -315,12 +315,9 @@
         }
 
         var fut = pts.slice(1).map(function (p, k) { return { p: p, v: p50[k + 1] }; });
-        var vs = fut.map(function (o) { return o.v; });
-        var flat = vs.length > 1 && (Math.max.apply(null, vs) - Math.min.apply(null, vs)) /
-          (vs.reduce(function (a, b) { return a + b; }, 0) / vs.length) < 0.01;
-        var keep = (!flat || fut.length <= 2) ? fut : [fut[0], fut[fut.length - 1]];
 
-        keep.forEach(function (o) {
+        // 线上的点全部标价（走平段也标，靠贪心避让错开位置）
+        fut.forEach(function (o) {
           labels.push({ pri: pri, x: o.p[0], y: o.p[1], text: fmtPrice(o.v), color: c.text });
         });
 
