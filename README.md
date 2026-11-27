@@ -2,6 +2,13 @@
 
 **线上：<https://unicornlee.github.io/kronos-rolling-forecast/>**
 
+两个页面（左侧导航切换，默认进「预测图表」）：
+
+| 页面 | 内容 |
+| --- | --- |
+| [`index.html`](https://unicornlee.github.io/kronos-rolling-forecast/) 预测图表 | 每天预测的未来 3 天叠在一张图上，连续 3 次预测三色区分，第 4 次回到第 1 次颜色 |
+| [`research.html`](https://unicornlee.github.io/kronos-rolling-forecast/research.html) 代理变量研究 | 利率 / 美元 / VIX / 情绪指数等 8 个市场代理变量，能不能提高准头的实测结论 |
+
 把 **每天预测的未来 3 天** 画在同一张图上，连续 3 次预测各用一种颜色区分，**第 4 次预测自动回到第 1 次的颜色**。
 每条折线的点、虚线端点、概率区间上下沿都直接标注价格，颜色与该次预测一致；X 轴刻度颜色也跟随覆盖该日期的那次预测。
 
@@ -12,28 +19,56 @@
 
 ## 页面结构
 
+### 预测图表（index.html）
+
 | 区块 | 内容 |
 | --- | --- |
 | 图表 | BTC / ETH / XAUT 切换；显示全部历史 / 价格标注 / 概率区间 / 校准目标 四个开关；下载 PNG |
 | 结论 | 5 张 KPI 卡（最新收盘、预测终点、校准终点、已兑现平均误差、悲观·乐观档）+ 按数据现算的结论文案 |
 | 逐日核对 | 只列**真实收盘已出**的预测日，逐条比模型 P50 / 校准 P50 / 真实值，标误差与方向命中 |
 | 每次预测明细 | 批次、锚点、锚点收盘、预训练 P50、涨跌、校准 P50、悲观·中性·乐观三档、P10–P90、p_up |
-| 怎么看这张图 | 5 条读图说明 |
+| 怎么看这张图 | 读图说明（含阴影顶点悬停看区间值） |
 | 不是投资建议 | 模型边界说明 |
+
+### 代理变量研究（research.html）
+
+| 区块 | 内容 |
+| --- | --- |
+| 一句话结论 | 3 段结论 + 4 张 KPI 卡 |
+| 8 个代理变量 | 最新值、日期、250 日分位、为什么值得看 |
+| 用途一：预测涨跌 | 代理变量水平 / 变化量 vs 未来 3 日收益的相关矩阵（结论：走不通） |
+| 用途二：预测模型误差 | 12 个窗口锚点日的代理值 vs 模型末值 MAPE（结论：有效，XAUT 的 DGS2 −0.71） |
+| 走势对照 | 手写 SVG 折线，BTC/ETH/XAUT 切换、归一化开关、20 日平滑 |
+| 接进决策层 | LOO gate 回测：按分位决定信模型还是退回 flat，与裸模型 / 永远 flat 对比 |
+| 怎么接 | 三步 + 时区对齐坑 |
+| 三条局限 | 12 窗口样本、变量共线、flat 基线难赢 |
 
 ---
 
 ## 目录
 
 ```
-index.html              单页入口
-assets/style.css        样式（含深色模式、移动端横向滑图）
+index.html              预测图表页
+research.html           代理变量研究页
+assets/style.css        样式（含左侧导航、深色模式、移动端横向滑图）
 assets/chart.js         纯 SVG 绘图，无第三方依赖（window.KChart）
-assets/app.js           交互、KPI、表格、PNG 导出、深链
-data/series.json        构建产物，页面唯一读取的数据文件
-scripts/build_data.py   把 sources/ 下的原始数据编译成 series.json
+assets/app.js           图表页交互、KPI、表格、PNG 导出、深链
+assets/research.js      研究页：表格生成 + 手写 SVG 走势图
+data/series.json        预测数据，构建产物
+data/proxy.json         代理变量数据，构建产物
+scripts/build_data.py   把 sources/runs + sources/actual 编译成 series.json
+scripts/build_proxy_data.py  把 sources/proxy + sources/bt 编译成 proxy.json
 sources/runs/runN/all.json      每次预测的原始输出（脚本直出）
 sources/actual/{SYM}_1D.csv     日线收盘数据
+sources/proxy/*.csv, *.json     代理变量原始数据（FRED / alternative.me / Yahoo）
+sources/bt/backtest2_all.json   12 窗口走查原始结果
+```
+
+构建两个数据文件：
+
+```bash
+python scripts/build_data.py
+python scripts/build_proxy_data.py
 ```
 
 ---

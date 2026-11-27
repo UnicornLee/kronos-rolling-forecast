@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>代理变量研究 · 能不能提高准头</title>
+<meta name="description" content="利率、美元、VIX、情绪指数等市场代理变量，与未来 3 日收益、与 Kronos 模型误差的实测相关性，以及接进决策层 gate 的回测结果。">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidenav">
+    <div class="brand">
+      <b>Kronos</b>
+      <span>Rolling Forecast</span>
+    </div>
+    <nav class="navlist">
+      <a href="index.html">
+        <span class="ico" aria-hidden="true">◧</span>预测图表
+        <em>三色叠加 · 逐日核对</em>
+      </a>
+      <a href="research.html" class="active" aria-current="page">
+        <span class="ico" aria-hidden="true">◈</span>代理变量研究
+        <em>利率 · 美元 · VIX · 情绪</em>
+      </a>
+    </nav>
+    <div class="navfoot">
+      <a href="https://github.com/UnicornLee/kronos-rolling-forecast" target="_blank" rel="noopener">仓库 →</a>
+    </div>
+  </aside>
+
+  <div class="content">
+
+    <header class="top">
+      <div class="wrap">
+        <h1>代理变量研究 <span class="dim">· 加数据能不能提高准头</span></h1>
+        <p class="sub" id="meta">正在加载数据…</p>
+      </div>
+    </header>
+
+    <main class="wrap">
+
+      <section class="card">
+        <h2>一句话结论</h2>
+        <div class="prose" id="verdict"></div>
+        <div class="kpis" id="kpis"></div>
+      </section>
+
+      <section class="card">
+        <h2>8 个代理变量 <span class="dim">全部免费、日频、无需 key</span></h2>
+        <div class="tablewrap"><table id="proxyTable"></table></div>
+        <p class="hint">"当前分位"= 最新值在最近 250 个交易日里的百分位。极值（&lt;10 或 &gt;90）往往比中间值有信息。</p>
+      </section>
+
+      <section class="card">
+        <h2>用途一：直接预测涨跌 <span class="dim">走不通</span></h2>
+        <p class="prose" style="margin-bottom:12px">
+          把代理变量的<b>水平</b>或<b>日变化量</b>，与标的未来 3 日收益做相关。左边是水平，右边是变化量。
+          <b>|相关| &lt; 0.1 基本等于没有信息</b>——这些变量解释不了明天涨还是跌。
+        </p>
+        <div class="tablewrap"><table id="corrTable"></table></div>
+      </section>
+
+      <section class="card">
+        <h2>用途二：预测模型误差 <span class="dim">有效</span></h2>
+        <p class="prose" style="margin-bottom:12px">
+          换个问法：不问"会涨还是跌"，而问"<b>这次 Kronos 会不会错</b>"。用 12 个历史窗口，
+          每个窗口锚点日（已提前 <b id="lagTxt">2</b> 天，防前视）的代理变量值，与该窗口的模型末值 MAPE 做相关。
+          颜色越深代表关系越强。
+        </p>
+        <div class="tablewrap"><table id="winCorrTable"></table></div>
+        <p class="hint">负相关 = 变量值越高，模型误差越小（模型越可靠）。XAUT 与美债收益率的关系最干净：
+          实际利率 DFII10 一路下跌时黄金走强，模型也好预测；利率剧烈波动时模型就失准。</p>
+      </section>
+
+      <section class="card">
+        <h2>走势对照 <span class="dim">代理变量 vs 标的价格</span></h2>
+        <div class="bars">
+          <div class="tabs" id="proxyTabs" role="tablist"></div>
+          <div class="controls">
+            <label class="chk"><input type="checkbox" id="norm" checked> 归一化（起点=100）</label>
+          </div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="chartbox" id="chartbox">
+          <svg id="chart" role="img" aria-label="代理变量与标的价格走势对照"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <p class="hint" id="chartHint"></p>
+      </section>
+
+      <section class="card">
+        <h2>接进决策层 <span class="dim">LOO gate 回测</span></h2>
+        <p class="prose" style="margin-bottom:12px">
+          用法不是把代理变量塞进 Kronos（它只吃 OHLCV 序列，塞不进标量），而是放在<b>外面做闸门</b>：
+          根据代理变量的历史分位，决定这一次<b>信模型</b>还是<b>退回 flat</b>（假设价格不变）。
+        </p>
+        <div class="tablewrap"><table id="gateTable"></table></div>
+        <p class="hint">注意：阈值与方向是在同一份 12 窗口上搜出来的，<b>有前视偏差，结果偏乐观</b>。
+          ETH 的最优解是"永远 flat"（模型占比 0%），这说明对 ETH 来说代理变量没提供有效信号。</p>
+      </section>
+
+      <section class="card">
+        <h2>怎么接 <span class="dim">三步 + 一个时区坑</span></h2>
+        <ol class="notes">
+          <li><b>抓数据</b>：FRED 直接用 <code>https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2</code>，
+            不需要 API key。FGI 用 <code>api.alternative.me/fng/?limit=0</code>，纳指用 Yahoo chart 接口（要带 UA 头）。</li>
+          <li><b>对齐时区（最容易错的地方）</b>：FRED 的日期 D 是美东 D 日收盘值（= 北京 D+1 日 04:00/05:00）。
+            北京 D+1 日 00:00 的收盘 K 线只能用 FRED ≤ D 的值。本页统一取
+            <b>代理变量日期 ≤ 锚点日期 − 2 天</b>，宁可少用一天也不引入前视偏差。</li>
+          <li><b>接进 gate</b>：别继续堆"某变量高于 X 就信模型"这种单特征规则。把代理变量做标准化 / 分位数化，
+            喂一个 <code>max_depth=2</code> 的决策树或 logistic，预测「<code>|模型误差| &gt; flat 误差</code>」的概率，
+            超过阈值就退回 flat。</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>三条局限 <span class="dim">别高估这套东西</span></h2>
+        <ul class="notes">
+          <li><b>样本只有 12 个窗口。</b>12 个点算出来的相关系数和最优阈值都不稳定，换个窗口集合结论就可能翻转。
+            现在能做的是"方向性判断"，不是"上线参数"。</li>
+          <li><b>代理变量彼此高度共线。</b>DGS2 / DGS10 / DFII10 两两相关 0.9 以上，一起丢进模型只会互相打架，
+            留一个（XAUT 留 DFII10）就够。</li>
+          <li><b>flat 基线本来就很难打赢。</b>12 个窗口里 flat 在三个标的上全部赢过模型
+            （BTC 3.29%→2.97%、ETH 5.77%→3.91%、XAUT 1.86%→1.36%）。
+            所以真正该先做的是<b>缩短视野（7→3 天）</b>和<b>输出区间而不是点</b>，加数据排在后面。</li>
+        </ul>
+      </section>
+
+      <section class="card warn">
+        <h2>这不是投资建议</h2>
+        <p>相关性不等于因果，回测结果含前视偏差。代理变量只用于判断"模型此刻可不可信"，
+          不构成任何买卖信号。</p>
+      </section>
+
+    </main>
+
+    <footer class="foot wrap">
+      <span id="footerMeta"></span>
+    </footer>
+
+  </div>
+</div>
+
+<script src="assets/research.js"></script>
+</body>
+</html>

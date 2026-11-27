@@ -8,77 +8,104 @@
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <h1>Kronos 滚动预测 <span class="dim">· 三次叠加对比</span></h1>
-    <p class="sub" id="meta">正在加载数据…</p>
-  </div>
-</header>
+<div class="shell">
 
-<main class="wrap">
+  <aside class="sidenav">
+    <div class="brand">
+      <b>Kronos</b>
+      <span>Rolling Forecast</span>
+    </div>
+    <nav class="navlist">
+      <a href="index.html" class="active" aria-current="page">
+        <span class="ico" aria-hidden="true">◧</span>预测图表
+        <em>三色叠加 · 逐日核对</em>
+      </a>
+      <a href="research.html">
+        <span class="ico" aria-hidden="true">◈</span>代理变量研究
+        <em>利率 · 美元 · VIX · 情绪</em>
+      </a>
+    </nav>
+    <div class="navfoot">
+      <a href="https://github.com/UnicornLee/kronos-rolling-forecast" target="_blank" rel="noopener">仓库 →</a>
+    </div>
+  </aside>
 
-  <section class="card">
-    <div class="bars">
-      <div class="tabs" id="symTabs" role="tablist"></div>
-      <div class="controls">
-        <label class="chk"><input type="checkbox" id="showAll"> 显示全部历史</label>
-        <label class="chk"><input type="checkbox" id="showLabels" checked> 价格标注</label>
-        <label class="chk"><input type="checkbox" id="showBand" checked> 概率区间</label>
-        <label class="chk"><input type="checkbox" id="showCal" checked> 校准目标</label>
-        <button class="btn" id="dlPng" type="button">下载 PNG</button>
+  <div class="content">
+
+    <header class="top">
+      <div class="wrap">
+        <h1>Kronos 滚动预测 <span class="dim">· 三次叠加对比</span></h1>
+        <p class="sub" id="meta">正在加载数据…</p>
       </div>
-    </div>
+    </header>
 
-    <div class="legend" id="legend"></div>
-    <div class="chartbox" id="chartbox">
-      <svg id="chart" role="img" aria-label="滚动预测对比折线图"></svg>
-      <div class="tip" id="tip" hidden></div>
-    </div>
-    <p class="hint" id="chartHint"></p>
-  </section>
+    <main class="wrap">
 
-  <section class="card">
-    <h2>结论 <span class="dim">最近一次</span></h2>
-    <div class="kpis" id="kpis"></div>
-    <div class="prose" id="latestNote"></div>
-  </section>
+      <section class="card">
+        <div class="bars">
+          <div class="tabs" id="symTabs" role="tablist"></div>
+          <div class="controls">
+            <label class="chk"><input type="checkbox" id="showAll"> 显示全部历史</label>
+            <label class="chk"><input type="checkbox" id="showLabels" checked> 价格标注</label>
+            <label class="chk"><input type="checkbox" id="showBand" checked> 概率区间</label>
+            <label class="chk"><input type="checkbox" id="showCal" checked> 校准目标</label>
+            <button class="btn" id="dlPng" type="button">下载 PNG</button>
+          </div>
+        </div>
 
-  <section class="card">
-    <h2>逐日核对 <span class="dim">只算真实收盘已出的日子</span></h2>
-    <div class="tablewrap"><table id="scoreTable"></table></div>
-    <p class="hint">校准量按天线性分摊：<code>校准 = 模型 + (校准终点 − 模型终点) × (k+1)/n</code>。
-      方向 = 预测末值相对锚点的涨跌方向是否与真实一致。</p>
-  </section>
+        <div class="legend" id="legend"></div>
+        <div class="chartbox" id="chartbox">
+          <svg id="chart" role="img" aria-label="滚动预测对比折线图"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <p class="hint" id="chartHint"></p>
+      </section>
 
-  <section class="card">
-    <h2>每次预测的明细</h2>
-    <div class="tablewrap"><table id="runTable"></table></div>
-  </section>
+      <section class="card">
+        <h2>结论 <span class="dim">最近一次</span></h2>
+        <div class="kpis" id="kpis"></div>
+        <div class="prose" id="latestNote"></div>
+      </section>
 
-  <section class="card">
-    <h2>怎么看这张图</h2>
-    <ul class="notes">
-      <li><b>粗线</b>是真实日收盘（浅色底深灰、深色底浅白）；<b>红点</b>是某次预测覆盖到、且当天收盘已经出来的真实值。</li>
-      <li>每次预测用一条彩色折线（P50 中位）+ 一片半透明带（P10–P90）。同一批预测的线、点、带、标注、坐标刻度都是同一个颜色。</li>
-      <li>虚线 + 空心菱形是<b>校准后的终点</b>：模型原始路径不被扭曲，校准只作为一个独立的目标标记画在最后一天。</li>
-      <li>配色是 3 色循环：第 4 次预测回到第 1 次的颜色——图上默认只画最近 3 次，需要看历史时勾「显示全部历史」。</li>
-      <li>点、虚线端点都直接标了价格，不用去查坐标轴。</li>
-      <li><b>阴影带的上下沿数值默认隐藏</b>（否则一天六七个数字糊成一片）——把鼠标移到阴影边缘的圆点上就会显示那一天 P10 / P90 的确切价格。</li>
-      <li>图表颜色自动跟随系统深色模式：浅色底用深灰画实际收盘，深色底自动换成浅白，坐标刻度同步变亮。</li>
-    </ul>
-  </section>
+      <section class="card">
+        <h2>逐日核对 <span class="dim">只算真实收盘已出的日子</span></h2>
+        <div class="tablewrap"><table id="scoreTable"></table></div>
+        <p class="hint">校准量按天线性分摊：<code>校准 = 模型 + (校准终点 − 模型终点) × (k+1)/n</code>。
+          方向 = 预测末值相对锚点的涨跌方向是否与真实一致。</p>
+      </section>
 
-  <section class="card warn">
-    <h2>这不是投资建议</h2>
-    <p>全部内容是模型输出与历史回测。Kronos 只吃 K 线，不含宏观、消息面、资金面等外生变量；
-      样本极小（每个标的几次预测），误差统计不具统计显著性。预测是概率区间工具，不是择时信号。</p>
-  </section>
+      <section class="card">
+        <h2>每次预测的明细</h2>
+        <div class="tablewrap"><table id="runTable"></table></div>
+      </section>
 
-</main>
+      <section class="card">
+        <h2>怎么看这张图</h2>
+        <ul class="notes">
+          <li><b>粗线</b>是真实日收盘（浅色底深灰、深色底浅白）；<b>红点</b>是某次预测覆盖到、且当天收盘已经出来的真实值。</li>
+          <li>每次预测用一条彩色折线（P50 中位）+ 一片半透明带（P10–P90）。同一批预测的线、点、带、标注、坐标刻度都是同一个颜色。</li>
+          <li>虚线 + 空心菱形是<b>校准后的终点</b>：模型原始路径不被扭曲，校准只作为一个独立的目标标记画在最后一天。</li>
+          <li>配色是 3 色循环：第 4 次预测回到第 1 次的颜色——图上默认只画最近 3 次，需要看历史时勾「显示全部历史」。</li>
+          <li>点、虚线端点都直接标了价格，不用去查坐标轴。</li>
+          <li><b>阴影带的上下沿数值默认隐藏</b>（否则一天六七个数字糊成一片）——把鼠标移到阴影边缘的圆点上就会显示那一天 P10 / P90 的确切价格。</li>
+          <li>图表颜色自动跟随系统深色模式：浅色底用深灰画实际收盘，深色底自动换成浅白，坐标刻度同步变亮。</li>
+        </ul>
+      </section>
 
-<footer class="foot wrap">
-  <span id="footerMeta"></span>
-</footer>
+      <section class="card warn">
+        <h2>这不是投资建议</h2>
+        <p>全部内容是模型输出与历史回测。Kronos 只吃 K 线，不含宏观、消息面、资金面等外生变量；
+          样本极小（每个标的几次预测），误差统计不具统计显著性。预测是概率区间工具，不是择时信号。</p>
+      </section>
+
+    </main>
+
+    <footer class="foot wrap">
+      <span id="footerMeta"></span>
+    </footer>
+
+  </div>
+</div>
 
 <script src="assets/chart.js"></script>
 <script src="assets/app.js"></script>
