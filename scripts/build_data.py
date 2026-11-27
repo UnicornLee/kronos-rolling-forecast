@@ -119,7 +119,22 @@ def main():
         for d in sorted(os.listdir(SRC_RUNS), key=run_sort_key):
             p = os.path.join(SRC_RUNS, d)
             if os.path.isdir(p) and os.path.exists(os.path.join(p, "all.json")):
-                run_dirs.append((len(run_dirs) + 1, d, p))
+                run_dirs.append((d, p))
+
+    # 同一个锚点（同一天数据）跑多次时只保留最新那份，避免图上出现两条重合的曲线
+    by_anchor = {}
+    for dname, dpath in run_dirs:
+        try:
+            head = json.load(open(os.path.join(dpath, "all.json"), encoding="utf-8"))
+            key = next(iter(head.values())).get("history_to") or dname
+        except Exception:
+            key = dname
+        by_anchor[key] = (dname, dpath)          # 后出现的（更新的目录名）覆盖前面的
+    kept = [by_anchor[k] for k in sorted(by_anchor)]
+    dropped = len(run_dirs) - len(kept)
+    if dropped:
+        print(f"  [dedupe] 跳过 {dropped} 个与已有批次同锚点的归档")
+    run_dirs = [(i + 1, d, p) for i, (d, p) in enumerate(kept)]
 
     payload = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
