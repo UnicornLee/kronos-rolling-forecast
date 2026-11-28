@@ -8,17 +8,17 @@
   // 北京时间"今天"（UTC+8），随真实日期滚动
   var TODAY = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
 
-  // 指标配色（分类）
+  // 指标配色（分类）—— label 同时用于图例和格子上圆点上方的短标签
   var KIND = {
     FOMC:  { label: '利率决议', color: '#6C44C8' },
-    NFP:   { label: '就业',     color: '#00969E' },
-    CPI:   { label: '通胀',     color: '#C0392B' },
-    PPI:   { label: '通胀',     color: '#D9822B' },
-    PCE:   { label: '通胀',     color: '#E28010' },
-    GDP:   { label: '增长',     color: '#1E6FD9' },
-    ISM:   { label: '增长',     color: '#3F6FD0' },
-    RETAIL:{ label: '增长',     color: '#5A7FD0' },
-    CLAIM: { label: '就业',     color: '#137A62' },
+    NFP:   { label: '非农',     color: '#00969E' },
+    CPI:   { label: 'CPI',      color: '#C0392B' },
+    PPI:   { label: 'PPI',      color: '#D9822B' },
+    PCE:   { label: 'PCE',      color: '#E28010' },
+    GDP:   { label: 'GDP',      color: '#1E6FD9' },
+    ISM:   { label: 'ISM',      color: '#3F6FD0' },
+    RETAIL:{ label: '零售',     color: '#5A7FD0' },
+    CLAIM: { label: '失业金',   color: '#137A62' },
     MICH:  { label: '情绪',     color: '#7A3E9D' }
   };
 
@@ -149,8 +149,11 @@
         var c = KIND[e.code] || { color:'#888' };
         dots += '<i class="cal-dot" style="background:' + c.color + '" title="' + esc(e.name) + '"></i>';
       });
+      // 圆点上方的短标签：多个数据时全部列出，用「/」隔开；
+      // title 带完整文字，格子放不下（CSS ellipsis）时鼠标悬停仍能看全。
+      var labels = evs.map(function (e) { return (KIND[e.code] || {}).label || e.code; });
       var tag = evs.length
-        ? '<span class="cal-tag">' + esc((KIND[evs[0].code] || {}).label || evs[0].code) + '</span>'
+        ? '<span class="cal-tag" title="' + esc(labels.join('/')) + '">' + esc(labels.join('/')) + '</span>'
         : '';
       html += '<div class="' + cls + '" role="gridcell" data-date="' + date + '" tabindex="0">' +
         '<span class="cal-num">' + d + '</span>' + tag +

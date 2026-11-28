@@ -431,9 +431,9 @@ code {
 .cal-lg { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
 .cal-lg i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
 
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
 .cal-wd { text-align: center; font-size: 12px; color: var(--text-3); padding: 2px 0 6px; }
-.cal-cell { position: relative; min-height: 78px; border: 1px solid var(--line); border-radius: 10px;
+.cal-cell { position: relative; min-width: 0; min-height: 78px; border: 1px solid var(--line); border-radius: 10px;
   padding: 8px 9px; background: var(--card); cursor: pointer; transition: .12s; overflow: hidden; }
 .cal-cell:hover { border-color: var(--line-strong); background: var(--bg-soft); }
 .cal-cell.blank { background: transparent; border-color: transparent; cursor: default; }
@@ -447,8 +447,8 @@ code {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cal-dots { position: absolute; left: 9px; bottom: 8px; display: flex; gap: 4px; }
 .cal-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
-.cal-badge { display: none; position: absolute; right: 6px; bottom: 6px; font-size: 12px;
-  color: var(--accent); }
+.cal-badge { display: none; position: absolute; left: 0; right: 0; bottom: 6px; text-align: center;
+  font-size: 12px; color: var(--accent); pointer-events: none; }
 .cal-cell:hover .cal-badge { display: block; }
 
 /* 当天列表 / 弹窗里的事件卡 */
