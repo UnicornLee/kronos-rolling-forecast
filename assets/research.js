@@ -93,7 +93,7 @@
   /* ---------- 代理变量表 ---------- */
   function renderProxyTable(d) {
     var t = document.getElementById('proxyTable');
-    var head = '<thead><tr><th>变量</th><th>最新值</th><th>日期</th><th>当前分位</th><th>为什么值得看</th></tr></thead>';
+    var head = '<thead><tr><th>变量</th><th>最新值</th><th>日期</th><th>当前分位</th><th class="tdnote">为什么值得看</th></tr></thead>';
     var rows = PROXIES.map(function (k) {
       var m = d.meta[k] || {};
       var lt = d.latest[k] || {};
@@ -161,7 +161,7 @@
   function renderGateTable(d) {
     var t = document.getElementById('gateTable');
     var head = '<thead><tr><th>标的</th><th>直接用模型</th><th>永远 flat</th>' +
-      '<th>最优闸门</th><th>闸门后 MAPE</th><th>比模型改善</th><th>比 flat 改善</th><th>信模型占比</th></tr></thead>';
+      '<th class="tdnote">最优闸门</th><th>闸门后 MAPE</th><th>比模型改善</th><th>比 flat 改善</th><th>信模型占比</th></tr></thead>';
     var rows = SYMS.map(function (s) {
       var g = d.gate[s];
       var b = g.best;
