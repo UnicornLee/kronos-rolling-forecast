@@ -13,6 +13,9 @@
   --warn: #b8860b;
   --bad: #c0392b;
   --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px rgba(16, 24, 40, .06);
+  --cal-past-bg: #f4f6f8;
+  --cal-today-bg: #e2f3e9;
+  --cal-today-num: #14539f;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -30,6 +33,9 @@
     --warn: #e5b95c;
     --bad: #f08a7d;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 16px rgba(0, 0, 0, .3);
+    --cal-past-bg: #20262e;
+    --cal-today-bg: #143026;
+    --cal-today-num: #7db4ff;
   }
 }
 
@@ -108,7 +114,7 @@ html, body {
 .navlist a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .navfoot { margin-top: auto; padding: 0 8px; font-size: 13px; }
-.navfoot a { display: inline-block; padding: 6px 4px; color: var(--text-3); text-decoration: none; }
+.navfoot a { display: inline-block; padding: 8px 10px; color: var(--text-3); text-decoration: none; white-space: nowrap; }
 .navfoot a:hover { color: var(--accent); }
 
 .content { flex: 1 1 auto; min-width: 0; }
@@ -412,4 +418,82 @@ code {
     text-align: center;
     padding-top: 6px;
   }
+}
+
+/* ---------- macro 页：月历 ---------- */
+.cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-nav b { font-size: 16px; min-width: 132px; text-align: center; }
+.btn { padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: 8px;
+  background: var(--card); color: var(--text); font-size: 14px; cursor: pointer; }
+.btn:hover { background: var(--bg-soft); }
+.btn.ghost { color: var(--text-2); }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
+.cal-lg { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); }
+.cal-lg i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+.cal-wd { text-align: center; font-size: 12px; color: var(--text-3); padding: 2px 0 6px; }
+.cal-cell { position: relative; min-height: 78px; border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 9px; background: var(--card); cursor: pointer; transition: .12s; overflow: hidden; }
+.cal-cell:hover { border-color: var(--line-strong); background: var(--bg-soft); }
+.cal-cell.blank { background: transparent; border-color: transparent; cursor: default; }
+.cal-cell.is-weekend .cal-num { color: var(--text-2); }
+.cal-cell.is-past { background: var(--cal-past-bg); }
+.cal-cell.is-today { background: var(--cal-today-bg); border-color: var(--accent); }
+.cal-cell.is-selected { border: 2px solid var(--accent); padding: 7px 8px; box-shadow: 0 0 0 3px rgba(30,111,217,.12); }
+.cal-num { font-size: 14px; font-weight: 620; }
+.cal-cell.is-today .cal-num { color: var(--cal-today-num); }
+.cal-tag { display: block; margin-top: 6px; font-size: 12px; color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-dots { position: absolute; left: 9px; bottom: 8px; display: flex; gap: 4px; }
+.cal-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+.cal-badge { display: none; position: absolute; right: 6px; bottom: 6px; font-size: 12px;
+  color: var(--accent); }
+.cal-cell:hover .cal-badge { display: block; }
+
+/* 当天列表 / 弹窗里的事件卡 */
+.ev-list { display: flex; flex-direction: column; gap: 14px; }
+.ev-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.ev-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.st { font-size: 12px; padding: 1px 7px; border-radius: 999px; }
+.st.released { background: rgba(19,122,98,.12); color: var(--ok); }
+.st.scheduled { background: rgba(184,134,11,.14); color: var(--warn); }
+.ev-meta { font-size: 12px; color: var(--text-3); margin: 4px 0 8px 17px; }
+.ev-nums { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-left: 17px; font-size: 13px; color: var(--text-2); }
+.ev-nums b { color: var(--text); font-variant-numeric: tabular-nums; }
+.ev-analysis { margin: 9px 0 0 17px; font-size: 13px; line-height: 1.55; color: var(--text-2);
+  padding: 8px 11px; border-radius: 8px; border-left: 3px solid var(--line-strong); background: var(--bg-soft); }
+.ev-analysis.dir-bull { border-left-color: var(--ok); }
+.ev-analysis.dir-bear { border-left-color: var(--bad); }
+.ev-analysis b { color: var(--text); }
+.prob-list { margin-left: 17px; display: flex; flex-direction: column; gap: 5px; }
+.prob-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.prob-row > span:first-child { width: 130px; color: var(--text-2); }
+.prob-bar { flex: 1; height: 8px; border-radius: 4px; background: var(--bg-soft); overflow: hidden; }
+.prob-bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.prob-row b { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 弹窗 */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(10,14,20,.55); z-index: 50;
+  display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-backdrop[hidden] { display: none; }
+.modal { width: min(620px, 100%); max-height: 84vh; overflow-y: auto; background: var(--card);
+  border: 1px solid var(--line-strong); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  padding: 20px 22px 22px; }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
+.modal-head h3 { margin: 0; font-size: 17px; }
+.modal-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+.modal-close { font-size: 24px; line-height: 1; border: 0; background: transparent; color: var(--text-3);
+  cursor: pointer; padding: 2px 8px; border-radius: 8px; }
+.modal-close:hover { background: var(--bg-soft); color: var(--text); }
+
+@media (max-width: 720px) {
+  .cal-grid { gap: 4px; }
+  .cal-cell { min-height: 62px; padding: 6px; border-radius: 8px; }
+  .cal-cell.is-selected { padding: 5px; }
+  .cal-tag { font-size: 12px; }
+  .cal-dots { left: 6px; bottom: 5px; }
+  .cal-wd { font-size: 12px; }
+  .prob-row > span:first-child { width: 96px; }
 }

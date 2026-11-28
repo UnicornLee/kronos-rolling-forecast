@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>宏观数据 · 月历</title>
+<meta name="description" content="重要美国宏观数据的月历：非农、CPI、PPI、核心 PCE、FOMC 利率决议等。单击选中当天，双击有数据的日子看详情。">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidenav">
+    <div class="brand">
+      <b>Kronos</b>
+      <span>Rolling Forecast</span>
+    </div>
+    <nav class="navlist">
+      <a href="index.html">
+        <span class="ico" aria-hidden="true">◧</span>预测图表
+        <em>三色叠加 · 逐日核对</em>
+      </a>
+      <a href="research.html">
+        <span class="ico" aria-hidden="true">◈</span>代理变量研究
+        <em>利率 · 美元 · VIX · 情绪</em>
+      </a>
+      <a href="macro.html" class="active" aria-current="page">
+        <span class="ico" aria-hidden="true">▦</span>宏观数据
+        <em>非农 · CPI · FOMC 月历</em>
+      </a>
+    </nav>
+    <div class="navfoot">
+      <a href="https://github.com/UnicornLee/kronos-rolling-forecast" target="_blank" rel="noopener">仓库 →</a>
+    </div>
+  </aside>
+
+  <div class="content">
+
+    <header class="top">
+      <div class="wrap">
+        <h1>宏观数据 <span class="dim">· 重要美国数据月历</span></h1>
+        <p class="sub" id="meta">正在加载数据…</p>
+      </div>
+    </header>
+
+    <main class="wrap">
+
+      <section class="card">
+        <div class="bars">
+          <div class="cal-nav">
+            <button class="btn" id="prevMonth" type="button" aria-label="上个月">‹</button>
+            <b id="monthLabel">—</b>
+            <button class="btn" id="nextMonth" type="button" aria-label="下个月">›</button>
+            <button class="btn ghost" id="todayBtn" type="button">今天</button>
+          </div>
+          <div class="cal-legend" id="calLegend"></div>
+        </div>
+        <div class="cal-grid" id="calGrid" role="grid" aria-label="宏观数据月历"></div>
+        <p class="hint" id="calHint">
+          <b>单击</b>日期查看当天列表 · <b>双击</b>有数据的日期看详情（已公布=实际值，未来=预测/概率）·
+          日期按<b>北京时间</b>，美国数据官方按美东时间公布，往往落在北京当天晚上或次日凌晨。
+        </p>
+      </section>
+
+      <section class="card" id="dayCard">
+        <h2 id="dayTitle">当天数据</h2>
+        <div id="dayDetail"></div>
+      </section>
+
+      <section class="card warn">
+        <h2>说明与数据来源</h2>
+        <p>
+          这是<b>设计稿</b>，页面里的数字是示例数据，用来演示交互，接真实抓取后会替换。
+          未来事件的「预测值」目前只有 FOMC 利率决议做 CME FedWatch 概率；非农 / CPI / PPI 等多数机构预期值
+          没有稳定免费源，先留空，公布后回填实际值。利多利空是按「实际 vs 预期」方向 + 指标经济学含义<b>自动生成</b>的规则文案，仅供参考。
+        </p>
+      </section>
+
+    </main>
+
+    <footer class="foot wrap">
+      <span id="footerMeta"></span>
+    </footer>
+
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">—</h3>
+        <div class="modal-sub" id="modalSub">—</div>
+      </div>
+      <button class="modal-close" id="modalClose" type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="assets/macro.js"></script>
+</body>
+</html>
