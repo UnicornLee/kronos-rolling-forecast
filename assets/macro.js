@@ -1,10 +1,12 @@
-/* 宏观数据月历 —— 设计稿交互（mock 数据内嵌；接真实数据时改为 fetch data/macro.json）
+/* 宏观数据月历
  * 日期一律按北京时间 YYYY-MM-DD。美国数据官方用美东时间，跨天的数据已换算到北京日期。
+ * 数据来自 data/macro.json（每日定时抓取）；加载失败时回退到内嵌 mock，保证页面始终可用。
  */
 (function () {
   'use strict';
 
-  var TODAY = '2026-11-28';
+  // 北京时间"今天"（UTC+8），随真实日期滚动
+  var TODAY = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
 
   // 指标配色（分类）
   var KIND = {
@@ -228,17 +230,7 @@
   }
   function closeModal() { $('modal').hidden = true; }
 
-  function boot() {
-    // 设计稿：直接用内嵌 mock。接真实数据时改成 fetch('data/macro.json') 覆盖 MOCK。
-    state.data = { generated_at:'设计稿示例数据', timezone:'北京', events:MOCK };
-    var t = parseYmd(TODAY);
-    state.year = t.y; state.month = t.m;
-    $('meta').textContent = '重要美国宏观数据 · 默认显示当月 · 数据更新于 ' + state.data.generated_at;
-    $('footerMeta').textContent = '月历按北京时间 · 单击选中、双击有数据的日子看详情 · ' +
-      '预测值目前仅 FOMC 有 FedWatch 概率，其余公布后回填 · ' + state.data.generated_at;
-
-    renderLegend(); renderCalendar(); renderDay();
-
+  function bindControls() {
     $('prevMonth').addEventListener('click', function () {
       state.month--; if (state.month < 0) { state.month = 11; state.year--; }
       renderCalendar();
@@ -254,6 +246,27 @@
     $('modalClose').addEventListener('click', closeModal);
     $('modal').addEventListener('click', function (e) { if (e.target === $('modal')) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+  }
+
+  function applyData(data) {
+    state.data = data;
+    var t = parseYmd(TODAY);
+    state.year = t.y; state.month = t.m;
+    var src = data.source ? (' · 来源：' + data.source) : '';
+    $('meta').textContent = '重要美国宏观数据 · 默认显示当月 · 数据更新于 ' + data.generated_at + src;
+    $('footerMeta').textContent = '月历按北京时间 · 单击选中、双击有数据的日子看详情 · ' +
+      '预测值目前仅 FOMC 有利率概率，其余公布后回填 · ' + data.generated_at;
+    renderLegend(); renderCalendar(); renderDay();
+  }
+
+  function boot() {
+    bindControls();
+    // 先渲染 mock，随后异步用真实数据覆盖；fetch 失败则保留 mock（离线不出空白）
+    applyData({ generated_at:'设计稿示例数据', timezone:'北京', source:'示例', events:MOCK });
+    fetch('data/macro.json?t=' + Date.now(), { cache:'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) { if (d && d.events && d.events.length) applyData(d); })
+      .catch(function (e) { console.warn('macro.json 加载失败，沿用示例数据：', e); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

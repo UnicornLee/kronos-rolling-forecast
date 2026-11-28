@@ -1,0 +1,269 @@
+{
+  "generated_at": "2026-11-28 11:36",
+  "timezone": "北京时间",
+  "source": "ShowMyTrades + 历史积累",
+  "source_url": "https://showmytrades.com/",
+  "note": "历史为已公布积累；未来项为市场预期；FOMC 利率概率为手工维护。",
+  "events": [
+    {
+      "date": "2026-11-06",
+      "code": "NFP",
+      "name": "美国 10月非农就业",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "+12.8万",
+      "forecast": "+11.5万",
+      "previous": "+22.3万",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-10",
+      "code": "CPI",
+      "name": "美国 10月 CPI 同比",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "3.1%",
+      "forecast": "3.2%",
+      "previous": "3.2%",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-12",
+      "code": "PPI",
+      "name": "美国 10月 PPI 同比",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "2.4%",
+      "forecast": "2.6%",
+      "previous": "2.8%",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-25",
+      "code": "PCE",
+      "name": "美国 10月核心 PCE 同比",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "2.8%",
+      "forecast": "2.8%",
+      "previous": "2.9%",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-26",
+      "code": "CLAIM",
+      "name": "美国初请失业金人数",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "21.9万",
+      "forecast": "22.5万",
+      "previous": "22.0万",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-26",
+      "code": "GDP",
+      "name": "美国 Q3 GDP 年化修正值",
+      "time_bj": "21:30",
+      "time_et": "08:30 ET",
+      "status": "released",
+      "actual": "2.8%",
+      "forecast": "2.9%",
+      "previous": "3.0%",
+      "source": "seed"
+    },
+    {
+      "date": "2026-11-27",
+      "code": "MICH",
+      "name": "密歇根消费者信心终值",
+      "time_bj": "23:00",
+      "time_et": "10:00 ET",
+      "status": "released",
+      "actual": "51.0",
+      "forecast": "50.5",
+      "previous": "50.5",
+      "source": "seed"
+    },
+    {
+      "date": "2026-12-01",
+      "code": "ISM",
+      "name": "美国 11月 ISM 制造业 PMI",
+      "time_bj": "23:00",
+      "time_et": "12-01 10:00 ET",
+      "status": "scheduled",
+      "forecast": "55",
+      "previous": "55.5",
+      "source": "showmytrades",
+      "raw_title": "ISM Manufacturing PMI"
+    },
+    {
+      "date": "2026-12-03",
+      "code": "CLAIM",
+      "name": "美国初请失业金人数",
+      "time_bj": "21:30",
+      "time_et": "12-03 08:30 ET",
+      "status": "scheduled",
+      "forecast": "195K",
+      "previous": "189K",
+      "source": "showmytrades",
+      "raw_title": "Initial Jobless Claims"
+    },
+    {
+      "date": "2026-12-04",
+      "code": "MICH",
+      "name": "密歇根消费者信心指数",
+      "time_bj": "23:00",
+      "time_et": "12-04 10:00 ET",
+      "status": "scheduled",
+      "forecast": "52.6",
+      "previous": "51.5",
+      "source": "showmytrades",
+      "raw_title": "Michigan Consumer Sentiment Index"
+    },
+    {
+      "date": "2026-12-04",
+      "code": "NFP",
+      "name": "美国 11月非农就业",
+      "time_bj": "21:30",
+      "time_et": "12-04 08:30 ET",
+      "status": "scheduled",
+      "forecast": "90K",
+      "previous": "165K",
+      "source": "showmytrades+seed",
+      "raw_title": "Nonfarm Payrolls"
+    },
+    {
+      "date": "2026-12-10",
+      "code": "CLAIM",
+      "name": "美国初请失业金人数",
+      "time_bj": "21:30",
+      "time_et": "12-10 08:30 ET",
+      "status": "scheduled",
+      "source": "showmytrades",
+      "raw_title": "Initial Jobless Claims"
+    },
+    {
+      "date": "2026-12-10",
+      "code": "CPI",
+      "name": "美国 11月 CPI 同比",
+      "time_bj": "21:30",
+      "time_et": "12-10 08:30 ET",
+      "status": "scheduled",
+      "forecast": "3.0%",
+      "previous": "3.7%",
+      "source": "showmytrades+seed",
+      "raw_title": "Consumer Price Index YoY"
+    },
+    {
+      "date": "2026-12-10",
+      "code": "FOMC",
+      "name": "美联储 FOMC 利率决议",
+      "time_bj": "03:00",
+      "time_et": "12-09 14:00 ET",
+      "status": "scheduled",
+      "previous": "4%",
+      "probabilities": [
+        {
+          "label": "维持 5.25–5.50%",
+          "p": 0.31
+        },
+        {
+          "label": "降息 25bp",
+          "p": 0.64
+        },
+        {
+          "label": "降息 50bp",
+          "p": 0.04
+        },
+        {
+          "label": "加息 25bp",
+          "p": 0.01
+        }
+      ],
+      "prob_note": "手工维护示例，下次 FOMC 前更新",
+      "source": "showmytrades+seed",
+      "raw_title": "Fed Interest Rate Decision"
+    },
+    {
+      "date": "2026-12-11",
+      "code": "RETAIL",
+      "name": "美国 11月零售销售 环比",
+      "time_bj": "21:30",
+      "time_et": "12-11 08:30 ET",
+      "status": "scheduled",
+      "previous": "0.2%",
+      "source": "showmytrades",
+      "raw_title": "Retail Sales MoM"
+    },
+    {
+      "date": "2026-12-15",
+      "code": "PPI",
+      "name": "美国 11月 PPI 同比",
+      "time_bj": "21:30",
+      "time_et": "12-15 08:30 ET",
+      "status": "scheduled",
+      "previous": "6.5%",
+      "source": "showmytrades",
+      "raw_title": "Producer Price Index YoY"
+    },
+    {
+      "date": "2026-12-17",
+      "code": "CLAIM",
+      "name": "美国初请失业金人数",
+      "time_bj": "21:30",
+      "time_et": "12-17 08:30 ET",
+      "status": "scheduled",
+      "source": "showmytrades",
+      "raw_title": "Initial Jobless Claims"
+    },
+    {
+      "date": "2026-12-18",
+      "code": "MICH",
+      "name": "密歇根消费者信心指数",
+      "time_bj": "23:00",
+      "time_et": "12-18 10:00 ET",
+      "status": "scheduled",
+      "source": "showmytrades",
+      "raw_title": "Michigan Consumer Sentiment Index"
+    },
+    {
+      "date": "2026-12-23",
+      "code": "CLAIM",
+      "name": "美国初请失业金人数",
+      "time_bj": "21:30",
+      "time_et": "12-23 08:30 ET",
+      "status": "scheduled",
+      "source": "showmytrades",
+      "raw_title": "Initial Jobless Claims"
+    },
+    {
+      "date": "2026-12-23",
+      "code": "GDP",
+      "name": "美国 GDP 年化（季度）",
+      "time_bj": "21:30",
+      "time_et": "12-23 08:30 ET",
+      "status": "scheduled",
+      "forecast": "2.8%",
+      "previous": "4.3%",
+      "source": "showmytrades+seed",
+      "raw_title": "Gross Domestic Product Annualized"
+    },
+    {
+      "date": "2026-12-23",
+      "code": "PCE",
+      "name": "美国 11月核心 PCE 同比",
+      "time_bj": "21:30",
+      "time_et": "12-23 08:30 ET",
+      "status": "scheduled",
+      "forecast": "2.7%",
+      "previous": "3.3%",
+      "source": "showmytrades+seed",
+      "raw_title": "Core Personal Consumption Expenditure - Price Index  YoY"
+    }
+  ]
+}
