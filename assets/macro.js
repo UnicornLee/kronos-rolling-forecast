@@ -10,7 +10,7 @@
 
   // 指标配色（分类）—— label 同时用于图例和格子上圆点上方的短标签
   var KIND = {
-    FOMC:  { label: '利率决议', color: '#6C44C8' },
+    FOMC:  { label: '利率',     color: '#6C44C8' },
     NFP:   { label: '非农',     color: '#00969E' },
     CPI:   { label: 'CPI',      color: '#C0392B' },
     PPI:   { label: 'PPI',      color: '#D9822B' },
