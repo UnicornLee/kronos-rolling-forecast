@@ -149,14 +149,19 @@
         var c = KIND[e.code] || { color:'#888' };
         dots += '<i class="cal-dot" style="background:' + c.color + '" title="' + esc(e.name) + '"></i>';
       });
-      // 圆点上方的短标签：多个数据时全部列出，用「/」隔开；
-      // title 带完整文字，格子放不下（CSS ellipsis）时鼠标悬停仍能看全。
+      // 中文短标签：靠格子右侧上下罗列，最多显示前 3 个；
+      // 容器 title 带完整文字，鼠标悬停能看全（超出 3 个时第 3 行用 +N 提示）。
       var labels = evs.map(function (e) { return (KIND[e.code] || {}).label || e.code; });
-      var tag = evs.length
-        ? '<span class="cal-tag" title="' + esc(labels.join('/')) + '">' + esc(labels.join('/')) + '</span>'
-        : '';
+      var tags = '';
+      if (evs.length) {
+        var shown = labels.slice(0, 3);
+        if (labels.length > 3) shown[2] = shown[2] + ' +' + (labels.length - 3);
+        tags = '<span class="cal-tags" title="' + esc(labels.join(' / ')) + '">' +
+          shown.map(function (lb) { return '<span class="cal-tag">' + esc(lb) + '</span>'; }).join('') +
+          '</span>';
+      }
       html += '<div class="' + cls + '" role="gridcell" data-date="' + date + '" tabindex="0">' +
-        '<span class="cal-num">' + d + '</span>' + tag +
+        '<span class="cal-num">' + d + '</span>' + tags +
         '<span class="cal-dots">' + dots + '</span>' +
         (evs.length ? '<span class="cal-badge" aria-hidden="true">双击看详情</span>' : '') +
         '</div>';
